@@ -14,9 +14,9 @@ Have you ever had a bunch of files in a folder, and wanted to know which of them
 It seems pretty niche at first, but this type of problem crops up surprisingly often. Halfwit was initially concieved for modded Minecraft, but I've since ran into at least 4 unrelated situations it would have fixed. Plus, it's *absurdly* configurable, and easily extendable, so there's a lot you can do with it.
 
 ## Adapter Scripts
-One crucial part of using Halfwit is adapter scripts. When Halfwit runs a program, it expects "success" to be represented by exit code 0, and "failure" to be represented by anything else. If your program behaves like that already, great! If not, you're gonna have to write an adapter script, which is simpler than it sounds. 
+One crucial part of using Halfwit is adapter scripts. When Halfwit runs a program, it expects "success" to be represented by exit code 0, and "failure" to be represented by any other exit code. If your program behaves like that already, great! If not, you're gonna have to write an adapter script.
 
-All an adapter script does is change whatever behavior you're investigating into the behavior Halfwit expects. Don't worry, you don't have to learn a new language, it's just a program. You can write it in whatever language you like. I recommend bash, since it's easy. Halfwit already comes with a few simple adapter scripts for some common tasks, which also serve as a good reference and starting point for your own. The following few might be especially helpful:
+All an adapter script does is change whatever behavior you're investigating into the behavior Halfwit expects. You can write it in whatever language you like. I recommend bash, since it's easy to work with environment variables (halfwit sets a lot of them). Halfwit already comes with a few simple adapter scripts for some common tasks, which also serve as a good reference and starting point for your own. The following few might be especially helpful:
 
 - `scripts/timeout.sh` - For tasks that take set time and then never exit.
 - `scripts/manual.sh` - For tasks too complex to automate.

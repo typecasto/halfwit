@@ -20,7 +20,7 @@
 //! instead of cutting it in half, simply mark it dominant and return.
 //!
 //! Basically, it's depth first search, with early branch pruning, and multiple
-//! search targets.
+//! search targets which are specified by behavior they cause in a group.
 
 use std::{collections::VecDeque, ops::RangeInclusive};
 
@@ -66,6 +66,7 @@ pub enum Behavior {
 /// A pair of indices representing the behavior of some items in a bisection.
 ///
 /// `from` and `to` point to indices in the [Bisection] object, and are inclusive.
+/// It is an error to construct a Group such that `to > from`.
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct Group {
     from: usize,
@@ -143,7 +144,10 @@ impl IntoIterator for &Group {
     }
 }
 
-// An active bisection taking place
+/// An active bisection taking place
+///
+/// Holds no reference to the actual behavior to be tested, that's done
+/// elsewhere.
 pub struct Bisection<T: Stateful> {
     objects: Vec<T>,
     groups: Vec<Group>,
@@ -158,6 +162,7 @@ impl<T: Stateful> Bisection<T> {
         }
     }
 
+    /// Change the state of all elements in a [Group]
     pub fn set_group_state(&mut self, group: &Group, state: State) {
         for i in group {
             self.objects.get_mut(i).unwrap().set_state(&state);
