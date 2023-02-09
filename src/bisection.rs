@@ -33,6 +33,10 @@ pub enum State {
 /// Can be enabled or disabled.
 pub trait Stateful {
     /// Sets the state of an object, updating the "real" thing it represents.
+    /// 
+    /// Note that this only takes a `&self` reference, meaning that you need to
+    /// keep track of State in a way that doesn't require mutability.
+    /// You may want to use a [Cell].
     fn set_state(&self, state: &State);
     /// Gets the current cached state of an object.
     fn state(&self) -> State;
@@ -54,8 +58,8 @@ pub trait Stateful {
 pub enum Behavior {
     #[default]
     Unknown,
-    Recessive,
     Dominant,
+    Recessive,
 }
 
 // pub struct Entry<T: Stateful> {
@@ -67,6 +71,39 @@ pub enum Behavior {
 ///
 /// `from` and `to` point to indices in the [Bisection] object, and are inclusive.
 /// It is an error to construct a Group such that `to > from`.
+/// 
+/// ## Ordering
+/// Groups are ordered by which should be tested first.
+/// 1. Groups are ranked by behavior: Unknown > Dominant > Recessive
+/// 2. Ties are broken by size: larger > smaller
+/// 3. Ties are further broken by ordering: first > last
+/// ### Examples
+/// Groups are ordered by behavior first.
+/// ```
+/// # use halfwit::bisection::Group;
+/// # use halfwit::bisection::Behavior::*;
+/// let a1 = Group::new(1, 2);
+/// let mut a2 = Group::new(1, 2);
+/// a2.set_behavior(Dominant);
+/// let mut a3 = Group::new(1, 2);
+/// a3.set_behavior(Recessive);
+/// assert!(a1 > a2);
+/// assert!(a2 > a3);
+/// ```
+/// If they have the same behavior, the larger group size wins.
+/// ```
+/// # use halfwit::bisection::Group;
+/// let b1 = Group::new(1, 4);
+/// let b2 = Group::new(1, 2);
+/// assert!(b1 > b2);
+/// ```
+/// Group size and behavior being equal, prefer earlier groups.
+/// ```
+/// # use halfwit::bisection::Group;
+/// let c1 = Group::new(1, 2);
+/// let c2 = Group::new(2, 3);
+/// assert!(c1 > c2);
+/// ```
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct Group {
     from: usize,
@@ -111,7 +148,7 @@ impl Group {
     /// ```
     pub fn split(&self) -> (Self, Self) {
         if self.from == self.to {
-            panic!("Tried to split a group that only contains one object!")
+            return (self.clone(), self.clone())
         }
         // If we're recessive, we really shouldn't be splitting anyways, but it's good
         // to maintain that knowledge.
@@ -167,6 +204,52 @@ impl IntoIterator for &Group {
     /// ```
     fn into_iter(self) -> Self::IntoIter {
         self.from()..=self.to()
+    }
+}
+
+impl PartialOrd for Group {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        use std::cmp::Ordering::*;
+        let b1 = match self.behavior {
+            Behavior::Unknown => 3,
+            Behavior::Dominant => 2,
+            Behavior::Recessive => 1,
+        };
+        let b2 = match other.behavior {
+            Behavior::Unknown => 3,
+            Behavior::Dominant => 2,
+            Behavior::Recessive => 1,
+        };
+        // compare behaviors (Unknown > Dominant > Recessive)
+        match b1.cmp(&b2) {
+            result @ (Less | Greater) => return Some(result),
+            Equal => {},
+        }
+        // compare sizes (4 > 2)
+        match self.size().cmp(&other.size()) {
+            result @ (Less | Greater) => return Some(result),
+            Equal => {},
+        }
+        // compare from (1 > 2)
+        match self.from().cmp(&other.from()) {
+            result @ (Less | Greater) => return Some(result.reverse()),
+            Equal => {},
+        }
+        // compare to (1 > 2)
+        match self.from().cmp(&other.from()) {
+            result @ (Less | Greater) => {
+                #[cfg(debug_assertions)]
+                panic!("Two groups differed by only `to`, despite having the same `from` and `.size()`!");
+                return Some(result.reverse())
+            },
+            Equal => {return Some(Equal)},
+        }
+    }
+}
+
+impl Ord for Group {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        return self.partial_cmp(&other).unwrap();
     }
 }
 
