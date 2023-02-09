@@ -1,3 +1,3 @@
 #![allow(unused,dead_code)]
 
-mod bisection;
+pub mod bisection;

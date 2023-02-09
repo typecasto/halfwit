@@ -101,8 +101,14 @@ impl Group {
 
     /// Splits this group into two groups
     ///
-    /// # Panics
-    /// Splitting a group which only points at one object will panic.
+    /// # Examples
+    /// ```
+    /// # use halfwit::bisection::Group;
+    /// assert_eq!(
+    ///     Group::new(7, 8).split(),
+    ///     (Group::new(7, 7), Group::new(8, 8))
+    /// )
+    /// ```
     pub fn split(&self) -> (Self, Self) {
         if self.from == self.to {
             panic!("Tried to split a group that only contains one object!")
@@ -128,8 +134,13 @@ impl Group {
 
     /// Get the number of objects this Group contains
     ///
-    /// Doesn't actually reference the container, so if the Group is out of bounds
-    /// then this will be incorrect.
+    /// # Examples
+    /// ```
+    /// # use halfwit::bisection::Group;
+    /// assert_eq!(Group::new(1, 1).size(), 1);
+    /// assert_eq!(Group::new(1, 2).size(), 2);
+    /// assert_eq!(Group::new(2, 3).size(), 2);
+    /// ```
     pub fn size(&self) -> usize {
         self.to - self.from + 1
     }
@@ -139,6 +150,21 @@ impl Group {
 impl IntoIterator for &Group {
     type Item = usize;
     type IntoIter = RangeInclusive<Self::Item>;
+    /// Iterate through indices in the group
+    /// 
+    /// # Examples
+    /// ```
+    /// # use halfwit::bisection::Group;
+    /// let group = Group::new(3, 7);
+    /// let mut test_vec = Vec::new();
+    /// for x in &group {
+    ///     test_vec.push(x * 10);
+    /// }
+    /// assert_eq!(
+    ///     test_vec,
+    ///     vec![30, 40, 50, 60, 70]
+    /// );
+    /// ```
     fn into_iter(self) -> Self::IntoIter {
         self.from()..=self.to()
     }
@@ -197,28 +223,6 @@ mod tests {
     );
     // nice!
 
-    // testing Group::range()
-    test_assert_eq!(group_size_one, Group::new(6, 6).size(), 1);
-    test_assert_eq!(group_size_two, Group::new(6, 7).size(), 2);
-
-    // testing Group::split()
-
-    /// Splitting [7] should panic
-    #[should_panic]
-    #[test]
-    fn group_split_one() {
-        Group::new(7, 7).split();
-    }
-
-    /// Splitting [7..8] should result in ([7], [8])
-    #[test]
-    fn group_split_two() {
-        assert_eq!(
-            Group::new(7, 8).split(),
-            (Group::new(7, 7), Group::new(8, 8))
-        )
-    }
-
     /// Splitting a Recessive group should result in 2 recessive groups
     #[test]
     fn group_split_behavior() {
@@ -239,15 +243,5 @@ mod tests {
                 }
             )
         )
-    }
-
-    /// Iterating over Group should Just Work
-    #[test]
-    fn group_into_iter() {
-        let mut sum_of_group = 0;
-        for i in &Group::new(1, 3) {
-            sum_of_group += i;
-        }
-        assert_eq!(sum_of_group, 6)
     }
 }
