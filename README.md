@@ -1,7 +1,7 @@
 # Warning!
-Halfwit is pre-alpha software. Whatever functionality you find is likely to be incomplete or buggy, the README makes promises it can't keep (for now!), and it's generally a Bad Idea to use. That being said, feel free to dive in and test whatever's there, send issues, write PRs, etc, even for minor things. There is no fix too minor, no bug too small, and no issue too meaningless, I'm happy to hear any and all feedback you have. 
+Halfwit is pre-alpha software. Whatever functionality you find is likely to be incomplete or buggy, the README makes promises it can't keep (for now!), and it's generally a Bad Idea to use. That being said, feel free to dive in and test whatever's there, send issues, write PRs, etc, even for minor things. There is no fix too minor, no bug too small, and no issue too pedantic, I'm happy to hear any and all feedback you have, constructive or not.
 
-Oh, and one more thing. If it's been ~2 months since I've written a commit, **please** make an issue about it, even if you're just passing by and don't intend to use Halfwit. Just a simple "hey, work on this" is all it takes, you won't annoy me. I want to work on this project, I just forget sometimes.
+Oh, and one more thing. If it's been ~2 months since I've written a commit, **please** do me a favor and make an issue about it, even if you're just passing by and don't intend to use Halfwit. Just a simple "hey, work on this" is all it takes, you won't annoy me. I want to work on this project, I just forget sometimes.
 
 ---
 
@@ -16,7 +16,7 @@ It seems pretty niche at first, but this type of problem crops up surprisingly o
 ## Adapter Scripts
 One crucial part of using Halfwit is adapter scripts. When Halfwit runs a program, it expects "success" to be represented by exit code 0, and "failure" to be represented by any other exit code. If your program behaves like that already, great! If not, you're gonna have to write an adapter script.
 
-All an adapter script does is change whatever behavior you're investigating into the behavior Halfwit expects. You can write it in whatever language you like. I recommend bash, since it's easy to work with environment variables (halfwit sets a lot of them). Halfwit already comes with a few simple adapter scripts for some common tasks, which also serve as a good reference and starting point for your own. The following few might be especially helpful:
+All an adapter script does is change whatever behavior you're investigating into the behavior Halfwit expects. You can write it in whatever language you like. I recommend bash, since it's easy to work with environment variables (halfwit sets a lot of them for you). Halfwit already comes with a few simple adapter scripts for some common tasks, which also serve as a good reference and starting point for your own. The following few might be especially helpful:
 
 - `scripts/timeout.sh` - For tasks that take set time and then never exit.
 - `scripts/manual.sh` - For tasks too complex to automate.
