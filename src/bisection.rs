@@ -45,6 +45,6 @@ impl<T: Clone> Actionable<Vec<T>> for T {
         base
     }
     fn unapply(&self, current: Vec<T>) -> ControlFlow<Vec<T>, Vec<T>> {
-        ControlFlow::Break(Vec<T>::default())
+        ControlFlow::Break(Vec::default())
     }
 }
