@@ -1,3 +1,3 @@
-#![allow(unused,dead_code)]
+#![allow(unused, dead_code)]
 
-pub mod bisection;
+// pub mod bisection;
