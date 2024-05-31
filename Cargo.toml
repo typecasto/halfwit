@@ -3,6 +3,8 @@ name = "halfwit"
 description = "A general-purpose file bisector"
 version = "0.0.1"
 edition = "2021"
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+color-eyre = "0.6.3"
+fncmd = "2.1.0"
+uuid = { version = "1.8.0", features = ["v4"] }
