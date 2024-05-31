@@ -1,6 +1,6 @@
 #![allow(unused, dead_code)]
 use std::{
-    collections::HashMap,
+    collections::{HashMap, VecDeque},
     fs::{self, File},
     io::{Seek, Write},
     path::{Path, PathBuf},
@@ -42,13 +42,49 @@ pub fn main(
     // todo: determine if this is useful
     let mut run = Command::new(shell.unwrap_or("sh".to_owned()));
     run.arg("-c").arg(&command);
+    assert_eq!(run.status()?.success(), false); // todo: better errors
     for path in manifest.values() {
         fs::remove_file(path)?;
     }
     println!("files destoyed :(");
-    // assert_eq!(run.status()?.success(), false);
-    restore_manifest(&manifest)?;
-    println!("files restoyed :)");
+    assert_eq!(run.status()?.success(), true); // todo: better errors
+    restore_manifest(&manifest);
+
+    // Start the bisection!
+    let mut stack: Vec<Vec<Uuid>> = vec![manifest.keys().map(|x| x.to_owned()).collect()];
+    let mut bad: Vec<Uuid> = Vec::new();
+    while !stack.is_empty() {
+        let next = stack.pop().unwrap();
+        for (uuid, path) in manifest.iter() {
+            if next.contains(uuid) {
+                if !path.exists() {
+                    fs::copy(format!(".halfwit/{}", uuid), path)?;
+                }
+            } else {
+                if path.exists() {
+                    fs::remove_file(path)?;
+                }
+            }
+        }
+        // run and handle the results
+        match run.status()?.success() {
+            true => {
+                // do nothing?
+            }
+            false if next.len() == 1 => {
+                println!(
+                    "bad element found: {}",
+                    manifest.get(&next[0]).unwrap().to_string_lossy()
+                );
+                bad.push(next[0]);
+            }
+            false => {
+                let (a, b) = next.split_at(next.len() / 2);
+                stack.push(a.to_owned());
+                stack.push(b.to_owned());
+            }
+        }
+    }
 
     Ok(())
 }
