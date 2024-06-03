@@ -43,10 +43,10 @@ pub fn main(
     let mut run = Command::new(shell.unwrap_or("sh".to_owned()));
     run.arg("-c").arg(&command);
     assert_eq!(run.status()?.success(), false); // todo: better errors
+                                                // todo: genericize
     for path in manifest.values() {
         fs::remove_file(path)?;
     }
-    println!("files destoyed :(");
     assert_eq!(run.status()?.success(), true); // todo: better errors
     restore_manifest(&manifest);
 
@@ -55,6 +55,7 @@ pub fn main(
     let mut bad: Vec<Uuid> = Vec::new();
     while !stack.is_empty() {
         let next = stack.pop().unwrap();
+        // todo: genericize
         for (uuid, path) in manifest.iter() {
             if next.contains(uuid) {
                 if !path.exists() {
@@ -85,6 +86,11 @@ pub fn main(
             }
         }
     }
+    println!("Bad files were:");
+    for uuid in bad.iter() {
+        println!("{}", manifest.get(uuid).unwrap().to_string_lossy());
+    }
+    restore_manifest(&manifest);
 
     Ok(())
 }
