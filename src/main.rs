@@ -3,6 +3,7 @@ use std::{
     collections::{HashMap, VecDeque},
     fs::{self, File},
     io::{Seek, Write},
+    os,
     path::{Path, PathBuf},
     process::Command,
 };
@@ -15,10 +16,10 @@ use uuid::Uuid;
 pub fn main(
     /// Command to be run to determine behavior
     command: String,
-    /// Shell to use instead of `sh`
+    /// Shell to use instead of `sh` or `cmd`
     #[opt(long)]
     shell: Option<String>,
-    /// List of files to work with
+    /// List of files or globs to work with.
     files: Vec<PathBuf>,
 ) -> R<()> {
     color_eyre::install();
@@ -38,10 +39,21 @@ pub fn main(
     let mut mfile = File::create(".halfwit/MANIFEST")?;
     write!(mfile, "{:#?}", manifest); // todo: use serde here so we can deserialize this too?
 
+    #[cfg(windows)]
+    let shell = shell.unwrap_or("powershell.exe".to_owned());
+    #[cfg(unix)]
+    let shell = shell.unwrap_or("sh".to_owned());
+    #[cfg(not(any(windows, unix)))]
+    compile_error!(
+        "Compiling on something that's neither windows nor unix. \
+        Please raise an issue and tell me what you're trying to do here. \
+        https://github.com/typecasto/halfwit"
+    );
+    let mut run = Command::new(shell);
+    run.arg("-c").arg(&command);
+
     // Verify that script works as intended
     // todo: determine if this is useful
-    let mut run = Command::new(shell.unwrap_or("sh".to_owned()));
-    run.arg("-c").arg(&command);
     assert_eq!(run.status()?.success(), false); // todo: better errors
                                                 // todo: genericize
     for path in manifest.values() {
