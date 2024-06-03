@@ -1,11 +1,12 @@
 #![allow(unused, dead_code)]
+use glob::glob;
 use std::{
     collections::{HashMap, VecDeque},
     fs::{self, File},
     io::{Seek, Write},
     os,
     path::{Path, PathBuf},
-    process::Command,
+    process::{Command, Stdio},
 };
 
 use color_eyre::Result as R;
@@ -20,7 +21,7 @@ pub fn main(
     #[opt(long)]
     shell: Option<String>,
     /// List of files or globs to work with.
-    files: Vec<PathBuf>,
+    files: Vec<String>,
 ) -> R<()> {
     color_eyre::install();
     eprintln!(
@@ -29,9 +30,22 @@ pub fn main(
     let _ = fs::remove_dir_all(".halfwit"); // rm -f
     fs::create_dir(".halfwit")?;
     let mut manifest: HashMap<Uuid, &Path> = HashMap::new();
+    let mut paths: Vec<PathBuf> = Vec::new();
+    for path in files {
+        if let Ok(paths_to_add) = glob(&path) {
+            for path in paths_to_add {
+                if let Ok(path) = path {
+                    if path.is_file() {
+                        paths.push(path);
+                    }
+                }
+            }
+        }
+    }
+    println!("paths: {:#?}", &paths);
 
     // copy the files to the manifest
-    for path in files.iter() {
+    for path in paths.iter() {
         let file_uuid = Uuid::new_v4();
         manifest.insert(file_uuid, path);
         fs::copy(path, format!(".halfwit/{}", file_uuid))?;
@@ -51,15 +65,18 @@ pub fn main(
     );
     let mut run = Command::new(shell);
     run.arg("-c").arg(&command);
+    run.stdin(Stdio::null());
+    run.stdout(Stdio::null());
+    run.stderr(Stdio::null());
 
     // Verify that script works as intended
     // todo: determine if this is useful
-    assert_eq!(run.status()?.success(), false); // todo: better errors
-                                                // todo: genericize
+    assert_eq!(run.status()?.success(), false); // TODO: better errors
+                                                // TODO: genericize
     for path in manifest.values() {
         fs::remove_file(path)?;
     }
-    assert_eq!(run.status()?.success(), true); // todo: better errors
+    assert_eq!(run.status()?.success(), true); // TODO: better errors
     restore_manifest(&manifest);
 
     // Start the bisection!
@@ -79,6 +96,7 @@ pub fn main(
                 }
             }
         }
+        println!("Testing batch of {} files.", next.len());
         // run and handle the results
         match run.status()?.success() {
             true => {
