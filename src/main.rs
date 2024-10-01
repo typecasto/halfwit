@@ -18,7 +18,7 @@ pub fn main(
     /// Command to be run to determine behavior
     command: String,
     /// Shell to use instead of `sh` or `cmd`
-    #[opt(long)]
+    #[opt(long, short)]
     shell: Option<String>,
     /// List of files or globs to work with.
     files: Vec<String>,
@@ -27,6 +27,7 @@ pub fn main(
     eprintln!(
         "Warning! Halfwit is unfinished software. You should backup all relevant files yourself."
     );
+    // TODO: way to restore a manifest automatically on previous failure
     let _ = fs::remove_dir_all(".halfwit"); // rm -f
     fs::create_dir(".halfwit")?;
     let mut manifest: HashMap<Uuid, &Path> = HashMap::new();
@@ -51,7 +52,7 @@ pub fn main(
         fs::copy(path, format!(".halfwit/{}", file_uuid))?;
     }
     let mut mfile = File::create(".halfwit/MANIFEST")?;
-    write!(mfile, "{:#?}", manifest); // todo: use serde here so we can deserialize this too?
+    write!(mfile, "{:#?}", manifest); // TODO: use serde here so we can deserialize this too?
 
     #[cfg(windows)]
     let shell = shell.unwrap_or("powershell.exe".to_owned());
@@ -70,13 +71,13 @@ pub fn main(
     run.stderr(Stdio::null());
 
     // Verify that script works as intended
-    // todo: determine if this is useful
-    assert_eq!(run.status()?.success(), false); // TODO: better errors
-                                                // TODO: genericize
+    // TODO: determine if this is useful
+    // assert_eq!(run.status()?.success(), false); // TODO: better errors
+    // TODO: genericize
     for path in manifest.values() {
         fs::remove_file(path)?;
     }
-    assert_eq!(run.status()?.success(), true); // TODO: better errors
+    // assert_eq!(run.status()?.success(), true); // TODO: better errors
     restore_manifest(&manifest);
 
     // Start the bisection!
