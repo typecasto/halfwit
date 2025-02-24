@@ -9,7 +9,7 @@ Halfwit is a general-purpose bisector, inspired by `git bisect` and similar tool
 ## ...what?
 Have you ever had a bunch of files in a folder, and wanted to know which of them is causing some certain behavior? 300+ Minecraft/Factorio/Skyrim/Fallout mods installed and you can't tell which one of them is crashing the game? That's what Halfwit solves. Halfwit enables and disables files, and then runs an arbitrary program. Based on what the program does, it enables and disables different files and runs it again. It keeps doing this until it can determine which file(s) are causing the program to behave how it was. 
 
-It seems pretty niche at first, but this type of problem crops up surprisingly often. Halfwit was initially concieved for modded Minecraft, but I've since ran into at least 4 unrelated situations it would have fixed. Plus, it's *absurdly* configurable, and easily extendable, so there's a lot you can do with it.
+It seems pretty niche at first, but this type of problem crops up surprisingly often. Halfwit was initially concieved for modded Minecraft, but I've since ran into at least 4 unrelated situations it would have fixed. <!--Plus, it's *absurdly* configurable, and easily extendable, so there's a lot you can do with it.-->
 
 <!--## Adapter Scripts
 One crucial part of using Halfwit is adapter scripts. When Halfwit runs a program, it expects "success" to be represented by exit code 0, and "failure" to be represented by any other exit code. If your program behaves like that already, great! If not, you're gonna have to write an adapter script.
