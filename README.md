@@ -1,5 +1,5 @@
 # Warning!
-Halfwit is alpha software. Only the baseline functionality is implemented, and it's a bit rough around the edges, but it does fulfill its intended purpose, and I've used it to solve a couple real-world problems. If you end up using it (successfully or otherwise), I'd really appreciate some feedback, feel free to raise an issue if you run into any bugs or have any feature suggestions. I'm currently focused on other projects, though, so don't expect frequent updates.
+~~Halfwit is alpha software. Only the baseline functionality is implemented, and it's a bit rough around the edges, but it does fulfill its intended purpose, and I've used it to solve a couple real-world problems. If you end up using it (successfully or otherwise), I'd really appreciate some feedback, feel free to raise an issue if you run into any bugs or have any feature suggestions. I'm currently focused on other projects, though, so don't expect frequent updates.~~ Somehow, it seems I've lost the functional halfwit code I had. I suspect it was on a laptop I no longer have, and never got pushed to Github. 
 
 ---
 
